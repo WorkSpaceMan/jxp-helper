@@ -1,22 +1,20 @@
-var config = require('../config');
+var config = require('config');
 var axios = require("axios");
 
 function displayError(err) {
 	console.error(`${ new Date().toISOString() }\turl: ${err.config.url}\tmethod: ${ err.request.method}\tstatus: ${err.response.status}\tstatusText: ${err.response.statusText}\tdata: ${ (err.response.data) ? JSON.stringify(err.response.data) : 'No data' }`);
 }
 
-var APIHelper = function(opts) {
+var JXPHelper = function(opts) {
 	const self = this;
-	self.api = config.api;
-	self.api_root = config.api_root;
-
+	self.api_root = config.jxp_server;
+	self.api = self.api_root + "/api";
 	self.config = opts => {
 		var self = this;
 		for (var opt in opts) {
 			self[opt] = opts[opt];
 		}
 	};
-
 	self.config(opts);
 
 	var _configParams = opts => {
@@ -33,11 +31,6 @@ var APIHelper = function(opts) {
 			}
 		}
 		return parts.join("&");
-	};
-
-	self.setup = (req, res, next) => {
-		req.apihelper = new APIHelper({ apikey: req.session.apikey });
-		next();
 	};
 
 	self.url = (type, opts) => {
@@ -312,5 +305,5 @@ var APIHelper = function(opts) {
 	};
 };
 
-module.exports = APIHelper;
+module.exports = JXPHelper;
 
