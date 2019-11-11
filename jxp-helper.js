@@ -14,8 +14,8 @@ var JXPHelper = function(opts) {
 		}
 	};
 	self.config(opts);
-	if (!self.config.server) throw("parameter server required");
-	self.api_root = self.config.server;
+	if (!self.server) throw("parameter server required");
+	self.api_root = self.server;
 	self.api = self.api_root + "/api";
 	var _configParams = opts => {
 		opts = opts || {};
@@ -39,11 +39,11 @@ var JXPHelper = function(opts) {
 
 	self.login = async (email, password) => {
 		try {
-			const data = (await axios.post(`${self.api_root}/login`, { email: email, password: password })).data;
+			const data = (await axios.post(`${self.api_root}/login`, { email, password })).data;
 			const user = (await axios.get(`${self.api}/user/${data.user_id}?apikey=${self.apikey}`)).data;
 			return { data, user };
 		} catch (err) {
-			return false;
+			return err.response.data;
 		}
 	}
 
