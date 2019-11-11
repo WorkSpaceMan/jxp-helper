@@ -1,6 +1,6 @@
 {
   "name": "jxp-helper",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A bunch of helpful functions for talking to a JXP API server ",
   "main": "jxp-helper.js",
   "scripts": {
@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/j-norwood-young/jxp-helper#readme",
   "dependencies": {
-    "axios": "^0.19.0",
-    "config": "^3.2.3"
+    "axios": "^0.19.0"
   }
 }

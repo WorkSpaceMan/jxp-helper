@@ -1,4 +1,3 @@
-var config = require('config');
 var axios = require("axios");
 
 function displayError(err) {
@@ -7,8 +6,7 @@ function displayError(err) {
 
 var JXPHelper = function(opts) {
 	const self = this;
-	self.api_root = config.jxp_server;
-	self.api = self.api_root + "/api";
+	
 	self.config = opts => {
 		var self = this;
 		for (var opt in opts) {
@@ -16,7 +14,9 @@ var JXPHelper = function(opts) {
 		}
 	};
 	self.config(opts);
-
+	if (!self.config.server) throw("parameter server required");
+	self.api_root = self.config.server;
+	self.api = self.api_root + "/api";
 	var _configParams = opts => {
 		opts = opts || {};
 		opts.apikey = self.apikey;
@@ -36,6 +36,16 @@ var JXPHelper = function(opts) {
 	self.url = (type, opts) => {
 		return self.api + "/" + type + "?" + _configParams(opts);
 	};
+
+	self.login = async (email, password) => {
+		try {
+			const data = (await axios.post(`${self.api_root}/login`, { email: email, password: password })).data;
+			const user = (await axios.get(`${self.api}/user/${data.user_id}?apikey=${self.apikey}`)).data;
+			return { data, user };
+		} catch (err) {
+			return false;
+		}
+	}
 
 	self.getOne = async (type, id, opts) => {
 		console.time("getOne." + type);
