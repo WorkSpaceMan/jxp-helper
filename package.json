@@ -1,6 +1,6 @@
 {
   "name": "jxp-helper",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A bunch of helpful functions for talking to a JXP API server ",
   "main": "jxp-helper.js",
   "scripts": {
