@@ -48,11 +48,12 @@ var JXPHelper = function(opts) {
 	}
 
 	self.getOne = async (type, id, opts) => {
-		console.time("getOne." + type);
+		const label = `getOne.${type}-${+ new Date()}`;
+		console.time(label);
 		var url = self.api + "/" + type + "/" + id + "?" + _configParams(opts);
 		try {
 			var result = await axios.get(url);
-			console.timeEnd("getOne." + type);
+			console.timeEnd(label);
 			if (result.status !== 200) {
 				throw(result.statusText);
 			}
@@ -64,34 +65,36 @@ var JXPHelper = function(opts) {
 	};
 
 	self.get = async (type, opts) => {
-		console.time("get." + type);
+		const label = `get.${type}-${+ new Date()}`;
+		console.time(label);
 		var url = self.url(type, opts);
 		try {
 			var result = await axios.get(url);
-			console.timeEnd("get." + type);
+			console.timeEnd(label);
 			if (result.status !== 200) {
 				throw(result.statusText);
 			}
 			return result.data;
 		} catch(err) {
-			console.timeEnd("get." + type);
+			console.timeEnd(label);
 			displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
 	};
 
 	self.query = async(type, query, opts) => {
-		console.time("query." + type);
+		const label = `query.${type}-${+ new Date()}`;
+		console.time(label);
 		var url = `${self.api_root}/query/${type}?${_configParams(opts)}`;
 		try {
 			var result = await axios.post(url, {query});
-			console.timeEnd("query." + type);
+			console.timeEnd(label);
 			if (result.status !== 200) {
 				throw(result.statusText);
 			}
 			return result.data;
 		} catch(err) {
-			console.timeEnd("query." + type);
+			console.timeEnd(label);
 			displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
