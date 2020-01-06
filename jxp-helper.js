@@ -4,6 +4,10 @@ function displayError(err) {
 	console.error(`${ new Date().toISOString() }\turl: ${err.config.url}\tmethod: ${ err.request.method}\tstatus: ${err.response.status}\tstatusText: ${err.response.statusText}\tdata: ${ (err.response.data) ? JSON.stringify(err.response.data) : 'No data' }`);
 }
 
+function randomString() {
+	return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
 var JXPHelper = function(opts) {
 	const self = this;
 	
@@ -48,53 +52,54 @@ var JXPHelper = function(opts) {
 	}
 
 	self.getOne = async (type, id, opts) => {
-		const label = `getOne.${type}-${+ new Date()}`;
-		console.time(label);
+		const label = `getOne.${type}-${randomString()}`;
+		if (this.debug) console.time(label);
 		var url = self.api + "/" + type + "/" + id + "?" + _configParams(opts);
 		try {
 			var result = await axios.get(url);
-			console.timeEnd(label);
+			if (this.debug) console.timeEnd(label);
 			if (result.status !== 200) {
 				throw(result.statusText);
 			}
 			return result.data;
 		} catch(err) {
+			if (this.debug) console.timeEnd(label);
 			displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
 	};
 
 	self.get = async (type, opts) => {
-		const label = `get.${type}-${+ new Date()}`;
-		console.time(label);
+		const label = `get.${type}-${randomString()}`;
+		if (this.debug) console.time(label);
 		var url = self.url(type, opts);
 		try {
 			var result = await axios.get(url);
-			console.timeEnd(label);
+			if (this.debug) console.timeEnd(label);
 			if (result.status !== 200) {
 				throw(result.statusText);
 			}
 			return result.data;
 		} catch(err) {
-			console.timeEnd(label);
+			if (this.debug) console.timeEnd(label);
 			displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
 	};
 
 	self.query = async(type, query, opts) => {
-		const label = `query.${type}-${+ new Date()}`;
-		console.time(label);
+		const label = `query.${type}-${randomString()}`;
+		if (this.debug) console.time(label);
 		var url = `${self.api_root}/query/${type}?${_configParams(opts)}`;
 		try {
 			var result = await axios.post(url, {query});
-			console.timeEnd(label);
+			if (this.debug) console.timeEnd(label);
 			if (result.status !== 200) {
 				throw(result.statusText);
 			}
 			return result.data;
 		} catch(err) {
-			console.timeEnd(label);
+			if (this.debug) console.timeEnd(label);
 			displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
@@ -102,7 +107,7 @@ var JXPHelper = function(opts) {
 
 	self.post = async (type, data) => {
 		var url = self.api + "/" + type + "?apikey=" + self.apikey;
-		console.log("POSTing to ", url, data);
+		if (this.debug) console.log("POSTing to ", url, data);
 		try {
 			return (await axios.post(url, data)).data;
 		} catch(err) {
@@ -113,7 +118,7 @@ var JXPHelper = function(opts) {
 
 	self.put = async (type, id, data) => {
 		var url = self.api + "/" + type + "/" + id + "?apikey=" + self.apikey;
-		console.log("PUTting to ", url, data);
+		if (this.debug) console.log("PUTting to ", url, data);
 		try {
 			return (await axios.put(url, data)).data;
 		} catch(err) {
@@ -162,9 +167,8 @@ var JXPHelper = function(opts) {
 			if (result.count === 0)
 				return true;
 			result.data.forEach(function(row) {
-				console.log("Found", row);
 				queue.push(function() {
-					console.log("Deleting id", row._id);
+					if (this.debug) console.log("Deleting", row._id);
 					return self.del(type, row._id);
 				});
 			});
@@ -209,13 +213,13 @@ var JXPHelper = function(opts) {
 			var queue = [];
 			inserts.forEach(function(insert_data) {
 				queue.push(function() {
-					console.log("Inserting");
+					if (this.debug) console.log("Inserting", insert_data);
 					self.post(type, insert_data);
 				});
 			});
 			updates.forEach(function(update_data) {
 				queue.push(function() {
-					console.log("Updating");
+					if (this.debug) console.log("Updating", update_data);
 					self.put(type, update_data._id, update_data);
 				});
 			});
@@ -234,7 +238,7 @@ var JXPHelper = function(opts) {
 	self.call = async (type, cmd, data) => {
 		//Call a function in the model
 		var url = self.api_root + "/call/" + type + "/" + cmd + "?apikey=" + self.apikey;
-		console.log("CALLing  ", url, data);
+		if (this.debug) console.log("CALLing  ", url, data);
 		try {
 			return (await axios.post(url, data)).data;
 		} catch(err) {
@@ -264,7 +268,7 @@ var JXPHelper = function(opts) {
 	self.groups_post = async (user_id, groups) => {
 		var url = self.api_root + "/groups/" + user_id + "?apikey=" + self.apikey;
 		var data = { group: groups };
-		console.log("GROUP POSTing  ", url, data);
+		if (this.debug) console.log("GROUP POSTing  ", url, data);
 		try {
 			return (await axios.post(url, data)).data;
 		} catch(err) {
