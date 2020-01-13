@@ -3,7 +3,7 @@ var axios = require("axios");
 function displayError(err) {
 	try {
 		console.error(`${ new Date().toISOString() }\turl: ${err.config.url}\tmethod: ${ err.request.method}\tstatus: ${err.response.status}\tstatusText: ${err.response.statusText}\tdata: ${ (err.response.data) ? JSON.stringify(err.response.data) : 'No data' }`);
-	} catch(err) {
+	} catch(parseErr) {
 		console.error(err);
 	}
 }
@@ -324,6 +324,17 @@ var JXPHelper = function(opts) {
 			return res.send(err);
 		});
 	};
+
+	self.getjwt = async (email) => {
+		try {
+			const jwt = (await axios.post(`${self.api_root}/login/getjwt?apikey=${self.apikey}`, { email })).data;
+			return jwt;
+		} catch (err) {
+			if (err.response && err.response.data)
+				return Promise.reject(err.response.data);
+			return Promise.reject(err);
+		}
+	}
 };
 
 module.exports = JXPHelper;
