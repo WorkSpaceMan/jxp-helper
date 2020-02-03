@@ -112,6 +112,7 @@ var JXPHelper = function(opts) {
 	self.count = async(type, opts) => {
 		const label = `count.${type}-${randomString()}`;
 		if (this.debug) console.time(label);
+		opts = opts || {};
 		opts.limit = 1;
 		var url = self.url(type, opts);
 		try {
