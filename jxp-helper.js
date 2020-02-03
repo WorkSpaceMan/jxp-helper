@@ -109,6 +109,25 @@ var JXPHelper = function(opts) {
 		}
 	}
 
+	self.count = async(type, opts) => {
+		const label = `count.${type}-${randomString()}`;
+		if (this.debug) console.time(label);
+		opts.limit = 1;
+		var url = self.url(type, opts);
+		try {
+			var result = await axios.get(url);
+			if (this.debug) console.timeEnd(label);
+			if (result.status !== 200) {
+				throw (result.statusText);
+			}
+			return result.data.count;
+		} catch (err) {
+			if (this.debug) console.timeEnd(label);
+			displayError(err);
+			throw (err.response ? err.response.data : err);
+		}
+	}
+
 	self.post = async (type, data) => {
 		var url = self.api + "/" + type + "?apikey=" + self.apikey;
 		if (this.debug) console.log("POSTing to ", url, data);
