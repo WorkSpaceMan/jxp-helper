@@ -1,33 +1,21 @@
 var axios = require("axios");
 
-function displayError(err) {
-	try {
-		console.error(`${ new Date().toISOString() }\turl: ${err.config.url}\tmethod: ${ err.request.method}\tstatus: ${err.response.status}\tstatusText: ${err.response.statusText}\tdata: ${ (err.response.data) ? JSON.stringify(err.response.data) : 'No data' }`);
-	} catch(parseErr) {
-		console.error(err);
+class JXPHelper {
+	constructor(opts) {
+		this.config(opts);
+		if (!this.server) throw ("parameter 'server' required");
+		this.api = this.server + "/api";
 	}
-}
-
-function randomString() {
-	return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-}
-
-var JXPHelper = function(opts) {
-	const self = this;
 	
-	self.config = opts => {
-		var self = this;
+	config(opts) {
 		for (var opt in opts) {
-			self[opt] = opts[opt];
+			this[opt] = opts[opt];
 		}
 	};
-	self.config(opts);
-	if (!self.server) throw("parameter server required");
-	self.api_root = self.server;
-	self.api = self.api_root + "/api";
-	var _configParams = opts => {
+	
+	_configParams(opts) {
 		opts = opts || {};
-		opts.apikey = self.apikey;
+		opts.apikey = this.apikey;
 		var parts = [];
 		for (var opt in opts) {
 			if (Array.isArray(opts[opt])) {
@@ -41,24 +29,36 @@ var JXPHelper = function(opts) {
 		return parts.join("&");
 	};
 
-	self.url = (type, opts) => {
-		return self.api + "/" + type + "?" + _configParams(opts);
-	};
+	_randomString() {
+		return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+	}
 
-	self.login = async (email, password) => {
+	_displayError(err) {
 		try {
-			const data = (await axios.post(`${self.api_root}/login`, { email, password })).data;
-			const user = (await axios.get(`${self.api}/user/${data.user_id}?apikey=${self.apikey}`)).data;
+			console.error(`${new Date().toISOString()}\turl: ${err.config.url}\tmethod: ${err.request.method}\tstatus: ${err.response.status}\tstatusText: ${err.response.statusText}\tdata: ${(err.response.data) ? JSON.stringify(err.response.data) : 'No data'}`);
+		} catch (parseErr) {
+			console.error(err);
+		}
+	}
+
+	url(type, opts) {
+		return `${this.api}/${type}?${this._configParams(opts)}`;
+	}
+
+	async login(email, password) {
+		try {
+			const data = (await axios.post(`${this.server}/login`, { email, password })).data;
+			const user = (await axios.get(`${this.api}/user/${data.user_id}?apikey=${this.apikey}`)).data;
 			return { data, user };
 		} catch (err) {
 			return err.response.data;
 		}
 	}
 
-	self.getOne = async (type, id, opts) => {
-		const label = `getOne.${type}-${randomString()}`;
+	async getOne(type, id, opts) {
+		const label = `getOne.${type}-${this._randomString()}`;
 		if (this.debug) console.time(label);
-		var url = self.api + "/" + type + "/" + id + "?" + _configParams(opts);
+		const url = `${this.api}/${type}/${id}?${this._configParams(opts)}`;
 		try {
 			var result = await axios.get(url);
 			if (this.debug) console.timeEnd(label);
@@ -68,15 +68,15 @@ var JXPHelper = function(opts) {
 			return result.data;
 		} catch(err) {
 			if (this.debug) console.timeEnd(label);
-			displayError(err);
+			this._displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
-	};
+	}
 
-	self.get = async (type, opts) => {
-		const label = `get.${type}-${randomString()}`;
+	async get(type, opts) {
+		const label = `get.${type}-${this._randomString()}`;
 		if (this.debug) console.time(label);
-		var url = self.url(type, opts);
+		var url = this.url(type, opts);
 		try {
 			var result = await axios.get(url);
 			if (this.debug) console.timeEnd(label);
@@ -86,15 +86,15 @@ var JXPHelper = function(opts) {
 			return result.data;
 		} catch(err) {
 			if (this.debug) console.timeEnd(label);
-			displayError(err);
+			this._displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
-	};
+	}
 
-	self.query = async(type, query, opts) => {
-		const label = `query.${type}-${randomString()}`;
+	async query (type, query, opts) {
+		const label = `query.${type}-${this._randomString()}`;
 		if (this.debug) console.time(label);
-		var url = `${self.api_root}/query/${type}?${_configParams(opts)}`;
+		var url = `${this.server}/query/${type}?${_configParams(opts)}`;
 		try {
 			var result = await axios.post(url, {query});
 			if (this.debug) console.timeEnd(label);
@@ -104,17 +104,17 @@ var JXPHelper = function(opts) {
 			return result.data;
 		} catch(err) {
 			if (this.debug) console.timeEnd(label);
-			displayError(err);
+			this._displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
 	}
 
-	self.count = async(type, opts) => {
-		const label = `count.${type}-${randomString()}`;
+	async count(type, opts) {
+		const label = `count.${type}-${this._randomString()}`;
 		if (this.debug) console.time(label);
 		opts = opts || {};
 		opts.limit = 1;
-		var url = self.url(type, opts);
+		var url = this.url(type, opts);
 		try {
 			var result = await axios.get(url);
 			if (this.debug) console.timeEnd(label);
@@ -124,230 +124,158 @@ var JXPHelper = function(opts) {
 			return result.data.count;
 		} catch (err) {
 			if (this.debug) console.timeEnd(label);
-			displayError(err);
+			this._displayError(err);
 			throw (err.response ? err.response.data : err);
 		}
 	}
 
-	self.post = async (type, data) => {
-		var url = self.api + "/" + type + "?apikey=" + self.apikey;
+	async post(type, data) {
+		var url = `${this.api}/${type}?apikey=${this.apikey}`;
 		if (this.debug) console.log("POSTing to ", url, data);
 		try {
 			return (await axios.post(url, data)).data;
 		} catch(err) {
-			displayError(err);
+			this._displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
-	};
+	}
 
-	self.put = async (type, id, data) => {
-		var url = self.api + "/" + type + "/" + id + "?apikey=" + self.apikey;
+	async put(type, id, data) {
+		var url = `${this.api}/${type}/${id}?apikey=${this.apikey}`;
 		if (this.debug) console.log("PUTting to ", url, data);
 		try {
 			return (await axios.put(url, data)).data;
 		} catch(err) {
-			displayError(err);
+			this._displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
-	};
+	}
 
-	self.postput = async (type, key, data) => {
+	async postput(type, key, data) {
 		// Post if we find key=id, else put
-		var self = this;
 		var obj = {};
-		obj["filter[" + key + "]"] = data[key];
+		obj[`filter[${key}]`] = data[key];
 		try {
-			var result = await self.get(type, obj);
+			var result = await this.get(type, obj);
 			if (result.count) {
 				var id = result.data[0]._id;
-				return self.put(type, id, data);
+				return this.put(type, id, data);
 			} else {
-				return self.post(type, data);
+				return this.post(type, data);
 			}
 		} catch(err) {
-			displayError(err);
+			this._displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
-	};
+	}
 
-	self.del = async (type, id) => {
-		var url = self.api + "/" + type + "/" + id + "?apikey=" + self.apikey;
+	async del(type, id) {
+		var url = `${this.api}/${type}/${id}?apikey=${this.apikey}`;
 		try {
 			return (await axios.delete(url)).data;
 		} catch(err) {
-			displayError(err);
+			this._displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
-	};
+	}
 
 	// This should be rewritten as an async pattern
-	self.delAll = (type, key, id) => {
-		var self = this;
+	async del_all(type, key, id) {
 		var obj = {};
-		obj["filter[" + key + "]"] = id;
-		return self.get(type, obj)
-		.then(function(result) {
-			var queue = [];
-			if (result.count === 0)
-				return true;
-			result.data.forEach(function(row) {
-				queue.push(function() {
-					if (this.debug) console.log("Deleting", row._id);
-					return self.del(type, row._id);
-				});
-			});
-			return queue.reduce(function(soFar, f) {
-				return soFar.then(f);
-			}, Q());
-		});
-	};
+		obj[`filter[${key}]`] = id;
+		try {
+			const results = [];
+			const items = (await self.get(type, obj)).data;
+			for (let item of items) {
+				results.push(await this.del(type, item._id));
+			}
+			return results;
+		} catch(err) {
+			this._displayError(err);
+			throw (err.response ? err.response.data : err);
+		}
+	}
 
-	// This should be rewritten as an async pattern
-	self.sync = (type, key, id, data) => {
+	async sync(type, key, id, data) {
 		// Given the records filtered by key = id, we create, update or delete until we are in sync with data.
 		var obj = {};
-		obj["filter[" + key + "]"] = id;
-		return self.get(type, obj)
-		.then(function(result) {
-			var data_ids = data.filter(function(row) {
-				return (row._id);
-			}).map(function(row) {
-				return row._id;
-			});
-			var dest_ids = result.data.map(function(row) {
-				return row._id;
-			});
-			// console.log("data_ids", data_ids);
-			// console.log("dest_ids", dest_ids);
-			var deletes = dest_ids.filter(function(n) {
-				return data_ids.indexOf(n) == -1;
-			}) || [];
-			var moreinserts = data_ids.filter(function(n) {
-				return (dest_ids.indexOf(n) == -1);
-			}) || [];
-			var inserts = data.filter(function(row) {
-				return (moreinserts.indexOf(row._id) != -1) || !(row._id);
-			});
-			var update_ids = dest_ids.filter(function(n) {
-				return data_ids.indexOf(n) != -1;
-			}) || [];
-			var updates = data.filter(function(row) {
-				return update_ids.indexOf(row._id) != -1;
-			}) || [];
-			var queue = [];
-			inserts.forEach(function(insert_data) {
+		obj[`filter[${key}]`] = id;
+		try {
+			let results = [];
+			const data = await this.get(type, obj).data;
+			const data_ids = data.filter(row => row._id).map(row => row._id);
+			const dest_ids = data.map(row => row._id);
+			const deletes = dest_ids.filter(n => data_ids.indexOf(n) == -1) || [];
+			const moreinserts = data_ids.filter(n => dest_ids.indexOf(n) == -1) || [];
+			const inserts = data.filter(row => moreinserts.indexOf(row._id) != -1) || !(row._id);
+			const update_ids = dest_ids.filter(n => data_ids.indexOf(n) != -1) || [];
+			const updates = data.filter(row => update_ids.indexOf(row._id) != -1) || [];
+			for (let insert of inserts) {
 				queue.push(function() {
-					if (this.debug) console.log("Inserting", insert_data);
-					self.post(type, insert_data);
+					if (this.debug) console.log("Inserting", insert);
+					results.push(await this.post(type, insert));
 				});
-			});
-			updates.forEach(function(update_data) {
-				queue.push(function() {
-					if (this.debug) console.log("Updating", update_data);
-					self.put(type, update_data._id, update_data);
-				});
-			});
-			deletes.forEach(function(delete_id) {
-				queue.push(function() {
-					console.log("Deleting");
-					self.del(type, delete_id);
-				});
-			});
-			return queue.reduce(function(soFar, f) {
-				return soFar.then(f);
-			}, Q());
-		});
-	};
+			}
+			for (let update of updates) {
+				if (this.debug) console.log("Updating", update);
+				results.push(await self.put(type, update._id, update));
+			}
+			for (let del of deletes) {
+				if (this.debug) console.log("Deleting", del);
+				results.push(await this.del(type, del));
+			}
+			return results;
+		} catch(err) {
+			this._displayError(err);
+			throw (err.response ? err.response.data : err);
+		}
+	}
 
-	self.call = async (type, cmd, data) => {
+	async call(type, cmd, data) {
 		//Call a function in the model
-		var url = self.api_root + "/call/" + type + "/" + cmd + "?apikey=" + self.apikey;
+		var url = `${this.server}/call/${type}/${cmd}?apikey=${this.apikey}`;
 		if (this.debug) console.log("CALLing  ", url, data);
 		try {
 			return (await axios.post(url, data)).data;
 		} catch(err) {
 			throw(err.response ? err.response.data : err);
 		}
-	};
+	}
 
-	self.groups_put = async (user_id, groups) => {
-		var url = self.api_root + "/groups/" + user_id + "?apikey=" + self.apikey;
+	async groups_put(user_id, groups) {
+		var url = `${this.server}/groups/${user_id}?apikey=${this.apikey}`;
 		try {
 			return (await axios.put(url, { group: groups })).data;
 		} catch(err) {
 			throw(err.response ? err.response.data : err);
 		}
-	};
+	}
 
-	self.groups_del = async (user_id, group) => {
-		var url = `${self.api_root}/groups/${user_id}?group=${group}&apikey=${self.apikey}`;
+	async groups_del(user_id, group) {
+		var url = `${this.server}/groups/${user_id}?group=${group}&apikey=${this.apikey}`;
 		try {
 			return (await axios.delete(url)).data;
 		} catch(err) {
-			displayError(err);
+			this._displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
-	};
+	}
 
-	self.groups_post = async (user_id, groups) => {
-		var url = self.api_root + "/groups/" + user_id + "?apikey=" + self.apikey;
+	async groups_post(user_id, groups) {
+		var url = `${this.server}/groups/${user_id}?apikey=${this.apikey}`;
 		var data = { group: groups };
-		if (this.debug) console.log("GROUP POSTing  ", url, data);
+		if (this.debug) console.log("GROUP POSTing", url, data);
 		try {
 			return (await axios.post(url, data)).data;
 		} catch(err) {
-			displayError(err);
+			this._displayError(err);
 			throw(err.response ? err.response.data : err);
 		}
-	};
+	}
 
-	self.getLocations = (req, res, next) => {
-		self.get("location")
-		.then(function(locations) {
-			res.locals.locations = locations.data;
-			return next();
-		}, function(err) {
-			displayError(err);
-			return res.send(err);
-		});
-	};
-
-	self.getMemberships = (req, res, next) => {
-		self.get("membership")
-		.then(function(result) {
-			res.locals.memberships = result.data;
-			return next();
-		}, function(err) {
-			displayError(err);
-			return res.send(err);
-		});
-	};
-
-	self.getMembers = (req, res, next) => {
-		self.get("user", { "filter[status]": "active" })
-		.then(function(result) {
-			res.locals.members = result.data;
-			return next();
-		}, function(err) {
-			displayError(err);
-			return res.send(err);
-		});
-	};
-
-	self.getOrganisations = (req, res, next) => {
-		self.get("organisation", { "filter[status]": "active" })
-		.then(function(result) {
-			res.locals.organisations = result.data;
-			return next();
-		}, function(err) {
-			displayError(err);
-			return res.send(err);
-		});
-	};
-
-	self.getjwt = async (email) => {
+	async getjwt(email) {
 		try {
-			const jwt = (await axios.post(`${self.api_root}/login/getjwt?apikey=${self.apikey}`, { email })).data;
+			const jwt = (await axios.post(`${this.server}/login/getjwt?apikey=${self.apikey}`, { email })).data;
 			return jwt;
 		} catch (err) {
 			if (err.response && err.response.data)

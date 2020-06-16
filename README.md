@@ -22,9 +22,9 @@ Eg. of `default.json`
 
 ### Pass in config
 
-When initialising the helper, just pass in `jxp_server`.
+When initialising the helper, just pass in `server`.
 
 ```
 const JXPHelper = require("jxp_helper");
-const apihelper = new JXPHelper({ jxp_server: "http://localhost/api" });
+const apihelper = new JXPHelper({ server: "http://localhost/api" });
 ```
