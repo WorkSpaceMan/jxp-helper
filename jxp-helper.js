@@ -211,10 +211,8 @@ class JXPHelper {
 			const update_ids = dest_ids.filter(n => data_ids.indexOf(n) != -1) || [];
 			const updates = data.filter(row => update_ids.indexOf(row._id) != -1) || [];
 			for (let insert of inserts) {
-				queue.push(function() {
-					if (this.debug) console.log("Inserting", insert);
-					results.push(await this.post(type, insert));
-				});
+				if (this.debug) console.log("Inserting", insert);
+				results.push(await this.post(type, insert));
 			}
 			for (let update of updates) {
 				if (this.debug) console.log("Updating", update);
