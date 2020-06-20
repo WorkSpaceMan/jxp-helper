@@ -94,7 +94,7 @@ class JXPHelper {
 	async query (type, query, opts) {
 		const label = `query.${type}-${this._randomString()}`;
 		if (this.debug) console.time(label);
-		var url = `${this.server}/query/${type}?${_configParams(opts)}`;
+		var url = `${this.server}/query/${type}?${this._configParams(opts)}`;
 		try {
 			var result = await axios.post(url, {query});
 			if (this.debug) console.timeEnd(label);
