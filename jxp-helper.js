@@ -109,6 +109,24 @@ class JXPHelper {
 		}
 	}
 
+	async aggregate(type, query, opts) {
+		const label = `aggregate.${type}-${this._randomString()}`;
+		if (this.debug) console.time(label);
+		var url = `${this.server}/aggregate/${type}?${this._configParams(opts)}`;
+		try {
+			var result = await axios.post(url, { query });
+			if (this.debug) console.timeEnd(label);
+			if (result.status !== 200) {
+				throw (result.statusText);
+			}
+			return result.data;
+		} catch (err) {
+			if (this.debug) console.timeEnd(label);
+			this._displayError(err);
+			throw (err.response ? err.response.data : err);
+		}
+	}
+
 	async count(type, opts) {
 		const label = `count.${type}-${this._randomString()}`;
 		if (this.debug) console.time(label);
