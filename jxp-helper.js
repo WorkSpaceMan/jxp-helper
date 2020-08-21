@@ -127,6 +127,28 @@ class JXPHelper {
 		}
 	}
 
+	async bulk_postput(type, key, data) {
+		try {
+			if (!Array.isArray(data)) return await JXPHelper.postput(type, key, data);
+			const updates = data.map(item => {
+				const updateQuery = {
+					"updateOne": {
+						"upsert": true
+					}
+				}
+				updateQuery.updateOne.update = item;
+				updateQuery.updateOne.filter = {};
+				updateQuery.updateOne.filter[key] = item[key];
+				return updateQuery;
+			});
+			const url = `${this.server}/bulkwrite/${type}?apikey=${this.apikey}`;
+			return (await axios.post(url, updates)).data;
+		} catch (err) {
+			this._displayError(err);
+			throw (err.response ? err.response.data : err);
+		}
+	}
+
 	async count(type, opts) {
 		const label = `count.${type}-${this._randomString()}`;
 		if (this.debug) console.time(label);
