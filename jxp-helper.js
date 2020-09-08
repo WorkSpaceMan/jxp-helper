@@ -313,7 +313,7 @@ class JXPHelper {
 
 	async getjwt(email) {
 		try {
-			const jwt = (await axios.post(`${this.server}/login/getjwt?apikey=${self.apikey}`, { email })).data;
+			const jwt = (await axios.post(`${ this.server }/login/getjwt?apikey=${ this.apikey }`, { email })).data;
 			return jwt;
 		} catch (err) {
 			if (err.response && err.response.data)
@@ -324,7 +324,7 @@ class JXPHelper {
 
 	async model(modelname) {
 		try {
-			const modeldef = (await axios.get(`${this.server}/model/${ modelname }?apikey=${self.apikey}`)).data;
+			const modeldef = (await axios.get(`${ this.server }/model/${ modelname }?apikey=${ this.apikey }`)).data;
 			return modeldef;
 		} catch (err) {
 			if (err.response && err.response.data)
@@ -335,7 +335,7 @@ class JXPHelper {
 
 	async models() {
 		try {
-			const modeldef = (await axios.get(`${this.server}/model?apikey=${self.apikey}`)).data;
+			const modeldef = (await axios.get(`${ this.server }/model?apikey=${ this.apikey }`)).data;
 			return modeldef;
 		} catch (err) {
 			if (err.response && err.response.data)
