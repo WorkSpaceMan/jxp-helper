@@ -321,6 +321,28 @@ class JXPHelper {
 			return Promise.reject(err);
 		}
 	}
+
+	async model(modelname) {
+		try {
+			const modeldef = (await axios.get(`${this.server}/model/${ modelname }?apikey=${self.apikey}`)).data;
+			return modeldef;
+		} catch (err) {
+			if (err.response && err.response.data)
+				return Promise.reject(err.response.data);
+			return Promise.reject(err);
+		}
+	}
+
+	async models() {
+		try {
+			const modeldef = (await axios.get(`${this.server}/model?apikey=${self.apikey}`)).data;
+			return modeldef;
+		} catch (err) {
+			if (err.response && err.response.data)
+				return Promise.reject(err.response.data);
+			return Promise.reject(err);
+		}
+	}
 };
 
 module.exports = JXPHelper;
