@@ -152,7 +152,11 @@ class JXPHelper {
 	async bulk_put(type, key, data) {
 		try {
 			const updates = data.map(item => {
-				const updateQuery = {}
+				const updateQuery = {
+					"updateOne": {
+						"upsert": false
+					}
+				}
 				updateQuery.updateOne.update = item;
 				updateQuery.updateOne.filter = {};
 				updateQuery.updateOne.filter[key] = item[key];
