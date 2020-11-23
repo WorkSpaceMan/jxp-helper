@@ -149,6 +149,23 @@ class JXPHelper {
 		}
 	}
 
+	async bulk_put(type, key, data) {
+		try {
+			const updates = data.map(item => {
+				const updateQuery = {}
+				updateQuery.updateOne.update = item;
+				updateQuery.updateOne.filter = {};
+				updateQuery.updateOne.filter[key] = item[key];
+				return updateQuery;
+			});
+			const url = `${this.server}/bulkwrite/${type}?apikey=${this.apikey}`;
+			return (await axios.post(url, updates)).data;
+		} catch (err) {
+			this._displayError(err);
+			throw (err.response ? err.response.data : err);
+		}
+	}
+
 	async count(type, opts) {
 		const label = `count.${type}-${this._randomString()}`;
 		if (this.debug) console.time(label);
