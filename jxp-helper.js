@@ -218,7 +218,7 @@ class JXPHelper {
 		obj[`filter[${key}]`] = data[key];
 		try {
 			var result = await this.get(type, obj);
-			if (result.count) {
+			if (result.data.length) {
 				var id = result.data[0]._id;
 				return this.put(type, id, data);
 			} else {
