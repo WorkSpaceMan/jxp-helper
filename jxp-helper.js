@@ -240,6 +240,17 @@ class JXPHelper {
 		}
 	}
 
+	// Permanently delete
+	async perm_del(type, id) {
+		var url = `${this.api}/${type}/${id}?_permaDelete=1&apikey=${this.apikey}`;
+		try {
+			return (await axios.delete(url)).data;
+		} catch(err) {
+			this._displayError(err);
+			throw(err.response ? err.response.data : err);
+		}
+	}
+
 	// This should be rewritten as an async pattern
 	async del_all(type, key, id) {
 		var obj = {};
