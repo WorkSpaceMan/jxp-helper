@@ -20,10 +20,10 @@ class JXPHelper {
 		for (var opt in opts) {
 			if (Array.isArray(opts[opt])) {
 				opts[opt].forEach(val => {
-					parts.push(opt + "=" + val);
+					parts.push(opt + "=" + encodeURIComponent(val));
 				});
 			} else {
-				parts.push(opt + "=" + opts[opt]);
+				parts.push(opt + "=" + encodeURIComponent(opts[opt]));
 			}
 		}
 		return parts.join("&");
