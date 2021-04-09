@@ -42,7 +42,7 @@ class JXPHelper {
 	}
 
 	url(type, opts, ep="api") {
-		return `${this.server}/${this.ep}/${type}?${this._configParams(opts)}`;
+		return `${this.server}/${ep}/${type}?${this._configParams(opts)}`;
 	}
 
 	async login(email, password) {
