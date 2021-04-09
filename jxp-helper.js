@@ -41,8 +41,8 @@ class JXPHelper {
 		}
 	}
 
-	url(type, opts) {
-		return `${this.api}/${type}?${this._configParams(opts)}`;
+	url(type, opts, ep="api") {
+		return `${this.server}/${this.ep}/${type}?${this._configParams(opts)}`;
 	}
 
 	async login(email, password) {
@@ -193,7 +193,7 @@ class JXPHelper {
 		if (this.debug) console.time(label);
 		opts = opts || {};
 		opts.limit = 1;
-		var url = this.url(type, opts);
+		var url = this.url(type, opts, "count");
 		try {
 			var result = await axios.get(url);
 			if (this.debug) console.timeEnd(label);
@@ -249,7 +249,7 @@ class JXPHelper {
 	}
 
 	async del(type, id) {
-		var url = `${this.api}/${type}/${id}?apikey=${this.apikey}`;
+		const url = `${this.api}/${type}/${id}?apikey=${this.apikey}`;
 		try {
 			return (await axios.delete(url)).data;
 		} catch(err) {
@@ -260,7 +260,7 @@ class JXPHelper {
 
 	// Permanently delete
 	async del_perm(type, id) {
-		var url = `${this.api}/${type}/${id}?_permaDelete=1&apikey=${this.apikey}`;
+		const url = `${this.api}/${type}/${id}?_permaDelete=1&apikey=${this.apikey}`;
 		try {
 			return (await axios.delete(url)).data;
 		} catch(err) {
