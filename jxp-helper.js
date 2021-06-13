@@ -188,6 +188,38 @@ class JXPHelper {
 		}
 	}
 
+	// A very fast way to update ALL rows in a collection, with no seatbelts
+	async put_all(type, data) {
+		try {
+			if (this.debug) console.log("put_all", type);
+			const query = [
+				{
+					"updateMany": {
+						"upsert": false,
+						filter: {},
+						update: { $set: data },
+					},
+				}
+			];
+			const url = `${this.server}/bulkwrite/${type}?apikey=${this.apikey}`;
+			return (await axios.post(url, query)).data;
+		} catch(err) {
+			this._displayError(err);
+			throw(err.response ? err.response.data : err);
+		}
+	}
+
+	async bulk(type, query) {
+		try {
+			if (this.debug) console.log("bulk", type);
+			const url = `${this.server}/bulkwrite/${type}?apikey=${this.apikey}`;
+			return (await axios.post(url, query)).data;
+		} catch(err) {
+			this._displayError(err);
+			throw(err.response ? err.response.data : err);
+		}
+	}
+
 	async count(type, opts) {
 		const label = `count.${type}-${this._randomString()}`;
 		if (this.debug) console.time(label);
