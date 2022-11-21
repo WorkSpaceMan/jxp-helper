@@ -147,7 +147,7 @@ class JXPHelper {
 
 	async bulk_postput(type, key, data) {
 		try {
-			if (!Array.isArray(data)) return await JXPHelper.postput(type, key, data);
+			if (!Array.isArray(data)) return await this.postput(type, key, data);
 			const updates = data.map(item => {
 				const updateQuery = {
 					"updateOne": {
@@ -156,7 +156,13 @@ class JXPHelper {
 				}
 				updateQuery.updateOne.update = item;
 				updateQuery.updateOne.filter = {};
-				updateQuery.updateOne.filter[key] = item[key];
+				if (Array.isArray(key)) {
+					key.forEach(k => {
+						updateQuery.updateOne.filter[k] = item[k];
+					});
+				} else {
+					updateQuery.updateOne.filter[key] = item[key];
+				}
 				return updateQuery;
 			});
 			const url = `${this.server}/bulkwrite/${type}?apikey=${this.apikey}`;
