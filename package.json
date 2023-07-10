@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/j-norwood-young/jxp-helper.git"
+    "url": "git+https://github.com/WorkSpaceMan/jxp-helper.git"
   },
   "author": "Jason Norwood-Young",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/j-norwood-young/jxp-helper/issues"
+    "url": "https://github.com/WorkSpaceMan/jxp-helper/issues"
   },
-  "homepage": "https://github.com/j-norwood-young/jxp-helper#readme",
+  "homepage": "https://github.com/WorkSpaceMan/jxp-helper#readme",
   "dependencies": {
     "axios": "^1.4.0"
   }
