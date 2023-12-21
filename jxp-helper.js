@@ -35,8 +35,9 @@ class JXPHelper {
 
 	_displayError(err) {
 		try {
+			if (this.opts.hideErrors) return;
 			console.error(`${new Date().toISOString()}\turl: ${err.config.url}\tmethod: ${err.request.method}\tstatus: ${err.response.status}\tstatusText: ${err.response.statusText}\tdata: ${(err.response.data) ? JSON.stringify(err.response.data) : 'No data'}`);
-		} catch (parseErr) {
+		} catch (err) {
 			console.error(err);
 		}
 	}
